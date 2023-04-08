@@ -122,20 +122,17 @@ class Chatbot():
             1.""" + str(result.iloc[0]['text']) + """
             2.""" + str(result.iloc[1]['text']) + """
             3.""" + str(result.iloc[2]['text']) + """
-
             Return a detailed answer based on the paper:"""
 
         print('Done creating prompt')
         return prompt
 
-    def gpt(self, messages):
-        print('Sending request to OpenAI')
-        model_name = "gpt-3.5-turbo"
-        print( f"\tUsing OpenAI model {model_name}" )
+    def gpt(self, prompt):
+        print('Sending request to GPT-3')
         openai.api_key = os.getenv('OPENAI_API_KEY')
-        r = openai.ChatCompletion.create(model=model_name, messages=messages, temperature=0.7, max_tokens=2500)
-        answer = r.choices[0]["message"]["content"]
-        print('Done sending request to OpenAI')
+        r = openai.Completion.create(model="text-davinci-003", prompt=prompt, temperature=0.4, max_tokens=1500)
+        answer = r.choices[0]['text']
+        print('Done sending request to GPT-3')
         response = {'answer': answer, 'sources': sources}
         return response
 
@@ -181,11 +178,7 @@ def reply():
     query = request.json['query']
     query = str(query)
     prompt = chatbot.create_prompt(df, query)
-    messages = [
-        { "role": "system", "content": prompt},
-        { "role": "user",   "content": query },
-    ]
-    response = chatbot.gpt(messages)
+    response = chatbot.gpt(prompt)
     print(response)
     return response, 200
 
